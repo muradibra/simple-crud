@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-md-6 my-5">
+                <div class="mb-3">
+                    <label for="name" class="form-label">
+                        Ad
+                    </label>
+                    <input type="text" class="form-control" id="name" placeholder="Ad daxil edin">
+                </div>
+                <div class="mb-3">
+                    <label for="surname" class="form-label">
+                        Soyad
+                    </label>
+                    <input type="text" class="form-control" id="surname" placeholder="Soyad daxil edin">
+                </div>
+                <div class="mb-3">
+                    <label for="fin" class="form-label">
+                        FIN
+                    </label>
+                    <input type="text" class="form-control" id="fin" placeholder="FIN daxil edin">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">
+                        Email
+                    </label>
+                    <input type="email" class="form-control" id="email" placeholder="Email daxil edin">
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">
+                        Telefon
+                    </label>
+                    <input type="tel" class="form-control" id="phone" placeholder="Telefon daxil edin">
+                </div>
+                <div class="mb-3">
+                    <label for="course" class="form-label">
+                        Kurs
+                    </label>
+                    <select id="course" class="form-select">
+                        <option selected value="0">Kurs seçin</option>
+                    </select>
+                </div>
+                <button type="submit" id="submitBtn" class="btn btn-primary">Əlavə et</button>
+                <button type="button" id="resetBtn" class="btn btn-secondary">Sıfırla</button>
+                <a href="list.html" class="btn btn-secondary">Listə bax</a>
+            </div>
+            <div class="col-12 col-md-6 my-5">
+                <div id="validationMessage" class="alert alert-danger d-none">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // CRUD
+
+        // Create
+        // Read
+        // Update
+        // Dalete
+
+        // fetch (api)
+        const course_list = [{
+            id: 1,
+            name: "Frontend proqramlaşdırma"
+        }, {
+            id: 2,
+            name: "Backend proqramlaşdırma (Php)"
+        }, {
+            id: 3,
+            name: "Backend proqramlaşdırma (Java)"
+        }, {
+            id: 4,
+            name: "UX/UI Design"
+        }]
+        localStorage.setItem("course_list", JSON.stringify(course_list))
+
+        const name_input = document.getElementById("name")
+        const surname_input = document.getElementById("surname")
+        const fin_input = document.getElementById("fin")
+        const email_input = document.getElementById("email")
+        const phone_input = document.getElementById("phone")
+        const course_input = document.getElementById("course")
+        const submit_btn = document.getElementById("submitBtn")
+        const reset_btn = document.getElementById("resetBtn")
+        const validation_alert = document.getElementById("validationMessage")
+
+        reset_btn.addEventListener("click", function () {
+            name_input.value = ""
+            surname_input.value = ""
+            email_input.value = ""
+            fin_input.value = ""
+            phone_input.value = ""
+            course_input.value = "0"
+
+            localStorage.removeItem("update_student")
+            submit_btn.innerText = "Əlavə et"
+        })
+
+        let updated_student = JSON.parse(localStorage.getItem("update_student"))
+
+        if (updated_student) {
+            submit_btn.innerText = "Yenilə"
+
+            name_input.value = updated_student.name
+            surname_input.value = updated_student.surname
+            email_input.value = updated_student.email
+            fin_input.value = updated_student.fin
+            phone_input.value = updated_student.phone
+            course_input.value = updated_student.course_id
+
+            fin_input.setAttribute("disabled", "")
+        }
+
+        course_list.forEach(item => {
+            course_input.innerHTML += `<option value="${item.id}">${item.name}</option>`
+        })
+
+        if (!localStorage.getItem("student_list")) {
+            localStorage.setItem("student_list", JSON.stringify([]))
+        }
+
+        function validate() {
+            const errors = []
+            const student_list = JSON.parse(localStorage.getItem("student_list"))
+
+            const existStudent = student_list.find(student => student.fin.toLowerCase() == fin_input.value.trim().toLowerCase())
+
+            // console.log(name_input.value)
+            // console.log(name_input.value.trim())
+
+            // name_input.value = name_input.value.trim()
+
+            if (!name_input.value.trim()) errors.push("Ad daxil etməmisiniz")
+            if (!surname_input.value.trim()) errors.push("Surname daxil etməmisiniz")
+            if (!fin_input.value.trim()) {
+                errors.push("FIN daxil etməmisiniz")
+            }
+            else if (!updated_student && existStudent) {
+                errors.push("FİN sistemdə mövcuddur")
+            }
+            if (!email_input.value.trim()) errors.push("Email daxil etməmisiniz")
+            if (!phone_input.value.trim()) errors.push("Telefon daxil etməmisiniz")
+            !course_input.value && errors.push("Kurs seçilməyib")
+            // !course_input.value ? errors.push("Phone daxil etməmisiniz") : ""
+
+            return errors
+        }
+
+        function clearForm() {
+            name_input.value = ""
+            surname_input.value = ""
+            fin_input.value = ""
+            email_input.value = ""
+            phone_input.value = ""
+            course_input.value = "0"
+        }
+
+        function writeErrorMessage(errorMessage) {
+            if (errorMessage.length) {
+                validation_alert.classList.replace("d-none", "d-block")
+                validation_alert.innerHTML = ""
+                errorMessage.forEach(element => {
+                    validation_alert.innerHTML += `<p>${element}</p>`
+                });
+                return
+            }
+
+            validation_alert.innerHTML = ""
+            validation_alert.classList.replace("d-block", "d-none")
+
+        }
+
+        submit_btn.addEventListener("click", function () {
+            // debuggers
+            // // update exist student
+            if (updated_student) {
+
+                // // don't update student's fin
+                // // updated_student.fin = fin_input.value;
+
+                updated_student.name = name_input.value;
+                updated_student.surname = surname_input.value;
+                updated_student.email = email_input.value;
+                updated_student.phone = phone_input.value;
+                updated_student.course_id = course_input.value;
+
+                const errorMessages = validate()
+                writeErrorMessage(errorMessages)
+
+                if (!errorMessages.length) {
+
+                    console.log("updated_student", updated_student);
+
+                    let currentList = JSON.parse(localStorage.getItem("student_list"))
+
+                    currentList = currentList.filter(student => student.fin !== updated_student.fin)
+
+                    currentList.push(updated_student)
+
+                    localStorage.setItem("student_list", JSON.stringify(currentList))
+
+                    localStorage.removeItem("update_student")
+
+                    clearForm()
+
+                    submit_btn.innerText = "Əlavə et"
+
+                    fin_input.removeAttribute("disabled")
+
+                    updated_student = null
+                }
+
+                return
+            }
+
+            // // create new student
+            const errorMessages = validate()
+
+            writeErrorMessage(errorMessages)
+
+            if (!errorMessages.length) {
+
+                const newStudent = {
+                    name: name_input.value,
+                    surname: surname_input.value,
+                    fin: fin_input.value,
+                    email: email_input.value,
+                    phone: phone_input.value,
+                    course_id: course_input.value
+                }
+
+                let currentList = JSON.parse(localStorage.getItem("student_list"))
+                if (!currentList) currentList = []
+                currentList.push(newStudent)
+
+                localStorage.setItem("student_list", JSON.stringify(currentList))
+
+                clearForm()
+
+            }
+
+        })
+    </script>
+</body>
+
+</html>
